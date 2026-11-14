@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Campus Classroom Allocator</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 1100px; margin: 20px auto; background: #f8fafc; padding: 15px; color: #1e293b; }
+        .header { background: #0f172a; color: white; padding: 16px 22px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h2 { margin: 0; font-size: 20px; }
+        .header span { font-size: 13px; background: #334155; padding: 5px 10px; border-radius: 4px; }
+        .top-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h3 { margin: 0 0 15px 0; font-size: 16px; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        label { font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 9px; box-sizing: border-box; border-radius: 5px; border: 1px solid #cbd5e1; font-size: 14px; }
+        button { width: 100%; background: #2563eb; color: white; border: none; font-weight: 600; padding: 11px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 6px; }
+        button:hover { background: #1d4ed8; }
+        .btn-del { background: #ef4444; padding: 5px 10px; font-size: 12px; width: auto; margin: 0; }
+        .btn-del:hover { background: #dc2626; }
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; }
+        th { background: #f1f5f9; color: #334155; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; }
+        .free { background: #dcfce7; color: #166534; }
+        .booked { background: #fee2e2; color: #991b1b; }
+        .small { background: #f1f5f9; color: #64748b; }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 18px; font-weight: 600; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Smart Campus Event & Classroom Allocation System</h2>
+    <span>3NF Relational Database (MySQL + JDBC)</span>
+</div>
+
+<!-- ALERT_BOX -->
+
+<div class="top-grid">
+    <!-- STEP 1: SINGLE ORGANIZED INPUT FORM -->
+    <div class="card">
+        <h3>1. Organize Event & Allocate Free Classroom</h3>
+        <form action="/book" method="POST">
+            <div class="form-row">
+                <div>
+                    <label>Event Name</label>
+                    <input type="text" name="event_name" placeholder="e.g., AI Workshop" required>
+                </div>
+                <div>
+                    <label>Event Category</label>
+                    <select name="event_theme">
+                        <option value="Technical Workshop">Technical Workshop</option>
+                        <option value="Coding Contest">Coding Contest</option>
+                        <option value="Department Seminar">Department Seminar</option>
+                        <option value="Club Activity">Club Activity</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label>Organizing Department (Table 1)</label>
+                    <select name="dept_id" required>
+                        <!-- DEPT_OPTIONS -->
+                    </select>
+                </div>
+                <div>
+                    <label>Expected Student Count</label>
+                    <input type="number" id="crowdInput" name="expected_crowd" value="60" min="10" max="800" oninput="updateLiveRooms()" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label>Event Date</label>
+                    <input type="date" id="dateInput" name="event_date" value="2026-11-10" onchange="updateLiveRooms()" required>
+                </div>
+                <div>
+                    <label>Session Slot</label>
+                    <select id="slotInput" name="time_slot" onchange="updateLiveRooms()">
+                        <option value="FN (9AM - 12PM)">FN (9AM - 12PM)</option>
+                        <option value="AN (1PM - 4PM)">AN (1PM - 4PM)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label>Available Free Classroom (Auto-Filtered by Date, Slot & Crowd)</label>
+                <select id="roomSelect" name="room_id" required>
+                </select>
+            </div>
+
+            <button type="submit">Confirm & Allocate Classroom</button>
+        </form>
+    </div>
+
+    <!-- STEP 2: LIVE CLASSROOM AVAILABILITY MATRIX -->
+    <div class="card">
+        <h3>2. Live Classroom Availability (Table 2: classrooms)</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Room No</th>
+                <th>Block</th>
+                <th>Capacity</th>
+                <th>Projector</th>
+                <th>Live Status</th>
+            </tr>
+            </thead>
+            <tbody id="liveRoomTable">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- STEP 3: NORMALIZED JOIN SCHEDULE -->
+<div class="card">
+    <h3>3. Confirmed Event Allocations (Table 3: Joined via Foreign Keys)</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Event Name</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Date</th>
+            <th>Session</th>
+            <th>Crowd</th>
+            <th>Allocated Room</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- BOOKING_ROWS -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const rooms = <!-- ROOMS_JSON -->;
+    const bookings = <!-- BOOKINGS_JSON -->;
+
+    function updateLiveRooms() {
+        const date = document.getElementById('dateInput').value;
+        const slot = document.getElementById('slotInput').value;
+        const crowd = parseInt(document.getElementById('crowdInput').value) || 0;
+
+        const tbody = document.getElementById('liveRoomTable');
+        const select = document.getElementById('roomSelect');
+        tbody.innerHTML = '';
+        select.innerHTML = '<option value="0">-- Auto-Assign Best Fitting Free Room --</option>';
+
+        let freeCount = 0;
+        rooms.forEach(r => {
+            const isBooked = bookings.some(b => b.roomId === r.id && b.date === date && b.slot === slot);
+            const fitsCrowd = r.cap >= crowd;
+
+            let badge = '';
+            if (isBooked) {
+                badge = '<span class="badge booked">BOOKED</span>';
+            } else if (!fitsCrowd) {
+                badge = '<span class="badge small">TOO SMALL</span>';
+            } else {
+                badge = '<span class="badge free">FREE</span>';
+                freeCount++;
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.no + ' (' + r.block + ' - Capacity: ' + r.cap + ')';
+                select.appendChild(opt);
+            }
+
+            tbody.innerHTML += `<tr>
+                    <td><b>${r.no}</b></td>
+                    <td>${r.block}</td>
+                    <td>${r.cap} seats</td>
+                    <td>${r.proj}</td>
+                    <td>${badge}</td>
+                </tr>`;
+        });
+
+        if (freeCount === 0) {
+            select.innerHTML = '<option value="-1">No Free Classrooms Fit This Crowd/Slot</option>';
+        }
+    }
+    window.onload = updateLiveRooms;
+</script>
+</body>
+</html>
