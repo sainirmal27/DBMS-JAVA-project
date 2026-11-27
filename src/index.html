@@ -5,260 +5,327 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Campus Classroom Allocation System</title>
     <style>
-        :root {
-            --ink: #0f172a;
-            --muted: #475569;
-            --glass: rgba(255, 255, 255, 0.82);
-            --glass-hi: rgba(255, 255, 255, 0.95);
-            --border: rgba(255, 255, 255, 0.9);
-            --line: rgba(15, 23, 42, 0.08);
-            --blue: #2563eb;
-            --indigo: #4f46e5;
-            --emerald: #059669;
-            --emerald-bg: rgba(16, 185, 129, 0.15);
-            --amber: #d97706;
-            --amber-bg: rgba(245, 158, 11, 0.16);
-            --rose: #e11d48;
-            --rose-bg: rgba(244, 63, 94, 0.15);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
         body {
-            color: var(--ink);
-            font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
             min-height: 100vh;
-            padding: 24px 20px 70px;
-            background: linear-gradient(135deg, #e0e7ff 0%, #e0f2fe 50%, #fae8ff 100%);
+            color: #0f172a;
+            padding: 20px;
             overflow-x: hidden;
-        }
-        #bg-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .wrap { position: relative; z-index: 1; max-width: 1260px; margin: 0 auto; }
-
-        header {
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
-            background: var(--glass); backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 22px; padding: 14px 22px; margin-bottom: 16px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-        }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-mark {
-            width: 40px; height: 40px; border-radius: 13px;
-            background: linear-gradient(135deg, var(--blue), var(--indigo));
-            color: #fff; display: grid; place-items: center;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
-        }
-        header h1 { font-size: clamp(1.1rem, 2vw, 1.48rem); font-weight: 700; letter-spacing: -0.02em; }
-
-        .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-        .tab {
-            padding: 8px 15px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.1);
-            background: rgba(255, 255, 255, 0.78); color: var(--muted); font-size: 0.83rem; font-weight: 600;
-            cursor: pointer; transition: 0.18s;
-        }
-        .tab.active { background: linear-gradient(135deg, var(--blue), var(--indigo)); color: #fff; border-color: transparent; }
-
-        .role-btn {
-            padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.15);
-            background: var(--ink); color: #fff; font-size: 0.8rem; font-weight: 700; cursor: pointer;
-        }
-        .role-btn.admin-on { background: var(--rose); border-color: var(--rose); }
-        .role-tag {
-            font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
-            background: rgba(37, 99, 235, 0.12); color: var(--blue);
-        }
-        .role-tag.admin-tag { background: var(--rose-bg); color: var(--rose); }
-
-        .dock {
-            background: var(--glass); backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 22px; padding: 16px 20px; margin-bottom: 16px;
-            display: flex; flex-direction: column; gap: 12px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-        }
-        .dock-row, .sub-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-        .sub-row { padding-top: 10px; border-top: 1px solid var(--line); }
-
-        .slot-pills, .cat-group, .inline-opts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-        .slot-btn, .cat-btn {
-            padding: 7px 12px; border-radius: 10px; border: 1px solid rgba(15, 23, 42, 0.1);
-            background: rgba(255, 255, 255, 0.85); color: var(--ink); font-size: 0.8rem; font-weight: 600; cursor: pointer;
-        }
-        .cat-btn { border-radius: 999px; }
-        .slot-btn.active, .cat-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-
-        input, select {
-            padding: 7px 10px; border-radius: 10px; border: 1px solid rgba(15, 23, 42, 0.12);
-            background: rgba(255, 255, 255, 0.92); color: var(--ink); font-size: 0.83rem; outline: none;
-        }
-        .chk { display: inline-flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-        .chk input { accent-color: var(--blue); }
-
-        .spotlight {
-            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
-            background: rgba(236, 253, 245, 0.88); backdrop-filter: blur(12px);
-            border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px;
-            padding: 12px 18px; margin-bottom: 18px; font-size: 0.85rem;
-        }
-        .dot {
-            width: 9px; height: 9px; border-radius: 50%; background: var(--emerald);
-            display: inline-block; margin-right: 7px; animation: pulse 1.7s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.55); }
-            70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+            background: #f4f6fb;
         }
 
-        .blocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(365px, 1fr)); gap: 18px; }
-        .block-card {
-            background: var(--glass); backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 22px; padding: 18px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-            display: flex; flex-direction: column; gap: 12px;
-        }
-        .block-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
-        .block-title-wrap { display: flex; align-items: center; gap: 10px; }
-        .art-badge { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; flex-shrink: 0; }
-        .b-name { font-size: 1.08rem; font-weight: 700; }
-        .b-free-list { font-size: 0.76rem; color: var(--emerald); font-weight: 600; margin-top: 2px; }
-        .meter-wrap { width: 100%; height: 6px; border-radius: 999px; background: rgba(15,23,42,0.08); overflow: hidden; }
-        .meter-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 999px; transition: width 0.3s; }
-
-        .room-stack { display: flex; flex-direction: column; gap: 8px; }
-        .r-item {
-            display: flex; justify-content: space-between; align-items: center; gap: 8px;
-            padding: 10px 12px; border-radius: 14px;
-            background: rgba(255, 255, 255, 0.72); border: 1px solid rgba(15, 23, 42, 0.06);
-        }
-        .r-item.free { background: rgba(236, 253, 245, 0.82); border-color: rgba(16, 185, 129, 0.32); }
-        .r-main { font-size: 0.9rem; font-weight: 700; }
-        .r-info { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
-
-        .badge { font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
-        .s-AVAILABLE { background: var(--emerald-bg); color: var(--emerald); }
-        .s-BOOKED { background: var(--rose-bg); color: var(--rose); }
-        .s-CLASS_OCCUPIED { background: var(--amber-bg); color: var(--amber); }
-        .s-PENDING { background: var(--amber-bg); color: var(--amber); }
-        .s-APPROVED { background: var(--emerald-bg); color: var(--emerald); }
-        .s-REJECTED { background: var(--rose-bg); color: var(--rose); }
-
-        .btn-go {
-            padding: 6px 11px; border-radius: 9px; border: none;
-            background: linear-gradient(135deg, var(--emerald), #10b981);
-            color: #fff; font-size: 0.74rem; font-weight: 700; cursor: pointer;
-        }
-        .btn-wait {
-            padding: 5px 9px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.4);
-            background: var(--amber-bg); color: var(--amber); font-size: 0.72rem; font-weight: 700; cursor: pointer;
+        /* Vibrant Live Colorful Mesh (GPU-safe smooth radial gradients — zero lag or tile dropouts) */
+        .mesh-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-color: #f5f7fc;
+            background-image:
+                    radial-gradient(at 12% 18%, rgba(255, 94, 58, 0.52) 0px, transparent 52%),
+                    radial-gradient(at 32% 45%, rgba(255, 166, 43, 0.42) 0px, transparent 50%),
+                    radial-gradient(at 86% 22%, rgba(14, 165, 233, 0.46) 0px, transparent 54%),
+                    radial-gradient(at 72% 82%, rgba(20, 184, 166, 0.48) 0px, transparent 52%),
+                    radial-gradient(at 18% 85%, rgba(99, 102, 241, 0.44) 0px, transparent 54%),
+                    radial-gradient(at 52% 60%, rgba(244, 63, 94, 0.28) 0px, transparent 48%);
+            background-size: 160% 160%;
+            animation: meshFlow 18s ease-in-out infinite alternate;
         }
 
+        /* Secondary diagonal light-streak layer for the reference aurora sweep */
+        .mesh-streak {
+            position: fixed;
+            inset: -20%;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                    linear-gradient(128deg,
+                    transparent 18%,
+                    rgba(255, 92, 53, 0.34) 36%,
+                    rgba(251, 146, 60, 0.28) 45%,
+                    rgba(255, 255, 255, 0.25) 52%,
+                    rgba(6, 182, 212, 0.32) 63%,
+                    rgba(79, 70, 229, 0.26) 76%,
+                    transparent 88%);
+            animation: streakDrift 22s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshFlow {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 45%; }
+            100% { background-position: 35% 100%; }
+        }
+
+        @keyframes streakDrift {
+            0%   { transform: translate(-3%, -2%) rotate(0deg) scale(1); }
+            100% { transform: translate(3%, 2%) rotate(3deg) scale(1.06); }
+        }
+
+        /* Crisp Tactile Film Grain Overlay */
+        .grain-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.22;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+        }
+
+        .container { max-width: 1280px; margin: 0 auto; position: relative; z-index: 2; }
+
+        /* Light Frosted Glass Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.80);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.90);
+            border-radius: 20px;
+            padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            margin-bottom: 18px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
+        .brand-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+            color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+            box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28);
+        }
+        .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-btn {
+            border: none; background: transparent; padding: 9px 16px; border-radius: 999px;
+            font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #334155; transition: 0.2s;
+        }
+        .nav-btn:hover { background: rgba(15, 23, 42, 0.07); color: #0f172a; }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: #fff;
+            box-shadow: 0 5px 14px rgba(79, 70, 229, 0.30);
+        }
+        .role-pill { padding: 6px 13px; border-radius: 999px; font-size: 0.78rem; font-weight: 800; }
+        .role-student { background: #dbeafe; color: #1d4ed8; }
+        .role-admin { background: #ffe4e6; color: #be123c; }
+        .btn-dark {
+            background: #0f172a; color: #fff; border: none; padding: 9px 18px; border-radius: 999px;
+            font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-dark:hover { background: #1e293b; transform: translateY(-1px); }
+        .btn-danger {
+            background: #e11d48; color: #fff; border: none; padding: 9px 18px; border-radius: 999px;
+            font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-danger:hover { background: #be123c; }
+
+        /* Frosted Light Glass Panels */
         .panel {
-            background: var(--glass-hi); backdrop-filter: blur(14px);
-            border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 18px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+            background: rgba(255, 255, 255, 0.80);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.90);
+            border-radius: 20px; padding: 18px 22px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+            margin-bottom: 16px;
         }
-        .panel h3 { font-size: 1rem; margin-bottom: 14px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 11px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
-        th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-        .act {
-            padding: 5px 9px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.12);
-            background: #fff; color: var(--ink); font-size: 0.74rem; font-weight: 600; cursor: pointer; margin: 2px;
+        .filter-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .filter-row + .filter-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(15, 23, 42, 0.08); }
+        .chip-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .chip {
+            border: 1px solid rgba(15, 23, 42, 0.10); background: rgba(255, 255, 255, 0.85);
+            padding: 7px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+            cursor: pointer; color: #334155; transition: 0.18s;
         }
-        .act:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .chip:hover { background: #fff; border-color: rgba(15, 23, 42, 0.25); }
+        .chip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+        .input-inline {
+            border: 1px solid rgba(15, 23, 42, 0.14); border-radius: 10px; padding: 7px 11px;
+            font-size: 0.88rem; background: rgba(255, 255, 255, 0.92); color: #0f172a;
+        }
+        .check-label { display: flex; align-items: center; gap: 5px; font-size: 0.86rem; font-weight: 700; color: #334155; cursor: pointer; }
 
-        .bar-row { display: grid; grid-template-columns: 90px 1fr 120px; gap: 12px; align-items: center; margin-bottom: 10px; font-size: 0.84rem; }
-        .bar-track { height: 12px; border-radius: 999px; background: rgba(15,23,42,0.08); overflow: hidden; }
-        .bar-val { height: 100%; background: linear-gradient(90deg, var(--blue), var(--indigo)); border-radius: 999px; transition: width 0.4s; }
-
-        .backdrop {
-            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 50;
+        /* Summary Bar */
+        .summary-bar {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 14px; padding: 11px 18px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            margin-bottom: 18px; font-size: 0.88rem;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
         }
-        .modal { background: #fff; border-radius: 20px; padding: 24px; width: 92%; max-width: 430px; box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22); }
-        .modal h3 { margin-bottom: 12px; font-size: 1.06rem; }
-        .field { margin-bottom: 10px; }
-        .field label { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-        .field input, .field select { width: 100%; }
-        .addons { display: flex; flex-wrap: wrap; gap: 10px; padding: 6px 0; }
+        .dot-green { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #10b981; margin-right: 7px; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
 
-        .toast {
-            display: none; position: fixed; bottom: 22px; right: 22px; z-index: 80;
-            background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 0.84rem;
+        /* Blocks Grid — fits 3 columns cleanly on laptop screens */
+        .blocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(335px, 1fr));
+            gap: 18px;
         }
-        .hide { display: none !important; }
+        .block-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            border-radius: 20px; padding: 18px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .block-card:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(15, 23, 42, 0.11); }
+        .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+        .block-title-wrap { display: flex; align-items: center; gap: 10px; }
+        .block-icon {
+            width: 34px; height: 34px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+        }
+        .block-title { font-size: 1.06rem; font-weight: 800; color: #0f172a; }
+        .block-sub { font-size: 0.77rem; color: #64748b; margin-top: 2px; }
+        .free-count { font-weight: 800; font-size: 0.84rem; color: #059669; white-space: nowrap; }
+        .progress-track { height: 6px; background: rgba(15, 23, 42, 0.08); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); border-radius: 999px; transition: width 0.3s; }
+
+        .room-item {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 23, 42, 0.07);
+            border-radius: 13px; padding: 11px 13px;
+            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+        }
+        .room-item:last-child { margin-bottom: 0; }
+        .room-name { font-weight: 800; font-size: 0.93rem; color: #0f172a; white-space: nowrap; }
+        .room-type { font-size: 0.70rem; color: #64748b; font-weight: 700; margin-left: 6px; }
+        .room-meta { font-size: 0.76rem; color: #475569; margin-top: 4px; line-height: 1.35; }
+        .room-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+        /* Badges & Small Buttons */
+        .badge { padding: 4px 9px; border-radius: 999px; font-size: 0.70rem; font-weight: 800; letter-spacing: 0.3px; white-space: nowrap; }
+        .badge-free, .badge-approved { background: #dcfce7; color: #15803d; }
+        .badge-occupied, .badge-pending { background: #fef3c7; color: #b45309; }
+        .badge-booked, .badge-rejected { background: #ffe4e6; color: #be123c; }
+
+        .btn-sm { border: none; padding: 6px 11px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.15s; }
+        .btn-book { background: #10b981; color: #fff; }
+        .btn-book:hover { background: #059669; }
+        .btn-waitlist { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .btn-waitlist:hover { background: #fde68a; }
+        .btn-outline { background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { background: #e2e8f0; }
+        .btn-approve { background: #10b981; color: #fff; }
+        .btn-reject { background: #f59e0b; color: #fff; }
+        .btn-delete { background: #ef4444; color: #fff; }
+        .btn-delete:hover { background: #dc2626; }
+        .btn-promote { background: #4f46e5; color: #fff; }
+        .btn-promote:hover { background: #4338ca; }
+
+        /* Tables */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; padding: 12px 10px; border-bottom: 1px solid rgba(15, 23, 42, 0.1); }
+        td { padding: 14px 10px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); font-size: 0.88rem; vertical-align: middle; }
+        .addon-text { color: #2563eb; font-size: 0.78rem; margin-top: 3px; font-weight: 600; }
+        .sub-text { color: #64748b; font-size: 0.8rem; margin-top: 2px; }
+
+        /* Analytics Bar */
+        .util-row { display: grid; grid-template-columns: 90px 1fr 140px; align-items: center; gap: 14px; margin: 12px 0; font-size: 0.9rem; font-weight: 700; }
+        .util-track { height: 11px; background: rgba(15, 23, 42, 0.09); border-radius: 999px; overflow: hidden; }
+        .util-fill { height: 100%; background: linear-gradient(90deg, #ff5e3a, #4f46e5); border-radius: 999px; }
+
+        /* Modals */
+        .modal-bg {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.42); backdrop-filter: blur(6px);
+            display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px;
+        }
+        .modal-bg.open { display: flex; }
+        .modal-card {
+            background: rgba(255, 255, 255, 0.96); border: 1px solid #fff;
+            border-radius: 20px; width: 100%; max-width: 480px; padding: 24px;
+            box-shadow: 0 24px 55px rgba(15, 23, 42, 0.22);
+        }
+        .modal-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 14px; color: #0f172a; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; background: #fff; color: #0f172a; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+        .hidden { display: none !important; }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 22px; right: 22px; background: #0f172a; color: #fff;
+            padding: 12px 18px; border-radius: 12px; font-size: 0.88rem; font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); display: none; z-index: 1200;
+        }
     </style>
 </head>
 <body>
-<canvas id="bg-canvas"></canvas>
+<!-- Live Colorful Mesh + Aurora Sweep + Film Grain -->
+<div class="mesh-bg"></div>
+<div class="mesh-streak"></div>
+<div class="grain-overlay"></div>
 
-<div class="wrap">
-    <header>
+<div class="container">
+    <!-- Navbar -->
+    <div class="navbar">
         <div class="brand">
-            <div class="brand-mark">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h2"/><path d="M13 10h2"/>
-                </svg>
-            </div>
-            <h1>Smart Campus Classroom Allocation System</h1>
+            <div class="brand-icon">🏛</div>
+            <span>Smart Campus Classroom Allocation System</span>
         </div>
-
-        <div class="nav-right">
-            <div class="tabs">
-                <button class="tab active" id="tab-rooms" onclick="switchTab('rooms', this)">Find Rooms</button>
-                <button class="tab" id="tab-bookings" onclick="switchTab('bookings', this)">Booking Status</button>
-                <button class="tab hide" id="tab-analytics" onclick="switchTab('analytics', this)">Analytics & Waitlist</button>
-            </div>
-            <span class="role-tag" id="role-badge">Student View</span>
-            <button class="role-btn" id="role-toggle" onclick="toggleAdmin()">Admin Login</button>
+        <div class="nav-actions">
+            <button id="tabRooms" class="nav-btn active" onclick="switchTab('rooms')">Find Rooms</button>
+            <button id="tabBookings" class="nav-btn" onclick="switchTab('bookings')">Booking Status</button>
+            <button id="tabAnalytics" class="nav-btn hidden" onclick="switchTab('analytics')">Analytics & Waitlist</button>
+            <span id="rolePill" class="role-pill role-student">Student View</span>
+            <button id="loginBtn" class="btn-dark" onclick="openModal('loginModal')">Admin Login</button>
+            <button id="logoutBtn" class="btn-danger hidden" onclick="logoutAdmin()">Logout Admin</button>
         </div>
-    </header>
+    </div>
 
-    <!-- TAB 1: FIND & BOOK ROOMS -->
-    <section id="sec-rooms">
-        <div class="dock">
-            <div class="dock-row">
-                <div class="slot-pills">
-                    <button class="slot-btn active" data-s="09:00" data-e="11:00" onclick="pickSlot(this)">09:00 – 11:00</button>
-                    <button class="slot-btn" data-s="11:00" data-e="13:00" onclick="pickSlot(this)">11:00 – 13:00</button>
-                    <button class="slot-btn" data-s="14:00" data-e="16:00" onclick="pickSlot(this)">14:00 – 16:00</button>
-                    <input type="time" id="t-start" value="09:00" onchange="clearSlot(); loadRooms()">
-                    <span style="font-size:0.8rem;color:var(--muted)">to</span>
-                    <input type="time" id="t-end" value="11:00" onchange="clearSlot(); loadRooms()">
-                </div>
-                <input type="date" id="f-date" onchange="loadRooms()">
-            </div>
-
-            <div class="sub-row">
-                <div class="cat-group">
-                    <button class="cat-btn active" data-t="ALL" onclick="pickType(this)">All Spaces</button>
-                    <button class="cat-btn" data-t="CLASSROOM" onclick="pickType(this)">Classrooms</button>
-                    <button class="cat-btn" data-t="LAB" onclick="pickType(this)">Labs</button>
-                    <button class="cat-btn" data-t="SEMINAR_HALL" onclick="pickType(this)">Seminar Halls</button>
-                    <button class="cat-btn" data-t="AUDITORIUM" onclick="pickType(this)">Auditoriums</button>
-                </div>
-
-                <div class="inline-opts">
-                    <input type="number" id="f-cap" value="1" min="1" style="width:80px" placeholder="Seats" oninput="loadRooms()">
-                    <label class="chk"><input type="checkbox" id="f-ac" onchange="loadRooms()"> AC</label>
-                    <label class="chk"><input type="checkbox" id="f-proj" onchange="loadRooms()"> Projector</label>
-                    <label class="chk"><input type="checkbox" id="only-free" onchange="renderBlocks()"> Free Only</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="spotlight">
-            <div><span class="dot"></span><span id="spot-text">Loading live block status...</span></div>
-            <div id="spot-blocks" style="color:var(--muted);font-size:0.8rem"></div>
-        </div>
-
-        <div id="blocks-grid" class="blocks-grid"></div>
-    </section>
-
-    <!-- TAB 2: BOOKING STATUS (STUDENT) / APPROVALS & SWAP (ADMIN) -->
-    <section id="sec-bookings" class="hide">
+    <!-- VIEW 1: FIND ROOMS -->
+    <div id="viewRooms">
         <div class="panel">
-            <h3 id="bookings-heading">Live Booking Status</h3>
-            <div style="overflow-x:auto">
+            <div class="filter-row">
+                <div class="chip-group">
+                    <button class="chip active" onclick="setQuickSlot(this,'09:00','11:00')">09:00 – 11:00</button>
+                    <button class="chip" onclick="setQuickSlot(this,'11:00','13:00')">11:00 – 13:00</button>
+                    <button class="chip" onclick="setQuickSlot(this,'14:00','16:00')">14:00 – 16:00</button>
+                    <input type="time" id="startTime" class="input-inline" value="09:00" onchange="loadRooms()">
+                    <span>to</span>
+                    <input type="time" id="endTime" class="input-inline" value="11:00" onchange="loadRooms()">
+                </div>
+                <div>
+                    <input type="date" id="searchDate" class="input-inline" onchange="loadRooms()">
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="chip-group" id="typeChips">
+                    <button class="chip active" onclick="setTypeFilter(this,'ALL')">All Spaces</button>
+                    <button class="chip" onclick="setTypeFilter(this,'CLASSROOM')">Classrooms</button>
+                    <button class="chip" onclick="setTypeFilter(this,'LAB')">Labs</button>
+                    <button class="chip" onclick="setTypeFilter(this,'SEMINAR HALL')">Seminar Halls</button>
+                    <button class="chip" onclick="setTypeFilter(this,'AUDITORIUM')">Auditoriums</button>
+                </div>
+                <div class="chip-group">
+                    <input type="number" id="minSeats" class="input-inline" style="width:76px;" value="1" min="1" oninput="renderRooms()" title="Min Seats">
+                    <label class="check-label"><input type="checkbox" id="filterAc" onchange="renderRooms()"> AC</label>
+                    <label class="check-label"><input type="checkbox" id="filterProj" onchange="renderRooms()"> Projector</label>
+                    <label class="check-label"><input type="checkbox" id="filterFree" onchange="renderRooms()"> Free Only</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-bar">
+            <div id="summaryLeft"><span class="dot-green"></span>Loading campus spaces...</div>
+            <div id="summaryRight" style="color:#475569;font-weight:600;"></div>
+        </div>
+
+        <div class="blocks-grid" id="blocksGrid"></div>
+    </div>
+
+    <!-- VIEW 2: BOOKING STATUS / ADMIN QUEUE -->
+    <div id="viewBookings" class="hidden">
+        <div class="panel">
+            <h2 id="bookingsHeading" style="font-size:1.12rem; font-weight:800;">Live Booking Status</h2>
+            <div class="table-wrap">
                 <table>
                     <thead>
                     <tr>
@@ -271,22 +338,21 @@
                         <th>Actions</th>
                     </tr>
                     </thead>
-                    <tbody id="bookings-rows"></tbody>
+                    <tbody id="bookingsBody"></tbody>
                 </table>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- TAB 3: ADMIN ONLY - UTILIZATION & WAITLIST -->
-    <section id="sec-analytics" class="hide">
+    <!-- VIEW 3: ANALYTICS & WAITLIST (ADMIN) -->
+    <div id="viewAnalytics" class="hidden">
         <div class="panel">
-            <h3>Block Utilization Dashboard</h3>
-            <div id="analytics-bars"></div>
+            <h2 style="font-size:1.12rem; font-weight:800; margin-bottom:14px;">Block Utilization Dashboard</h2>
+            <div id="utilizationBars"></div>
         </div>
-
         <div class="panel">
-            <h3>Hall Waitlist Queue</h3>
-            <div style="overflow-x:auto">
+            <h2 style="font-size:1.12rem; font-weight:800;">Hall Waitlist Queue</h2>
+            <div class="table-wrap">
                 <table>
                     <thead>
                     <tr>
@@ -297,434 +363,526 @@
                         <th>Admin Action</th>
                     </tr>
                     </thead>
-                    <tbody id="waitlist-rows"></tbody>
+                    <tbody id="waitlistBody"></tbody>
                 </table>
             </div>
         </div>
-    </section>
+    </div>
 </div>
 
-<!-- Booking / Waitlist Modal -->
-<div class="backdrop" id="modal">
-    <div class="modal">
-        <h3 id="m-title">Allocate Space</h3>
-        <input type="hidden" id="m-rid">
-        <input type="hidden" id="m-mode" value="book">
-        <div class="field"><label>Event / Workshop Title</label><input type="text" id="m-ev" placeholder="Hackathon / Guest Lecture"></div>
-        <div class="field"><label>Coordinator</label><input type="text" id="m-org" placeholder="Name & Dept"></div>
-        <div class="field"><label>Department</label><select id="m-dept"></select></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div class="field"><label>Expected Attendees</label><input type="number" id="m-att" value="40"></div>
-            <div class="field" id="end-date-wrap"><label>End Date (Multi-Day)</label><input type="date" id="m-end-date"></div>
+<!-- MODAL: ADMIN LOGIN -->
+<div class="modal-bg" id="loginModal">
+    <div class="modal-card" style="max-width:380px;">
+        <div class="modal-title">Faculty / Admin Login</div>
+        <div class="form-group">
+            <label>Enter Admin PIN</label>
+            <input type="password" id="adminPinInput" class="form-control" placeholder="PIN (2026)" onkeydown="if(event.key==='Enter') loginAdmin()">
         </div>
-        <div class="field" id="addons-wrap">
-            <label>Equipment Add-ons</label>
-            <div class="addons">
-                <label class="chk"><input type="checkbox" class="res-chk" value="Wireless Mic"> Wireless Mic</label>
-                <label class="chk"><input type="checkbox" class="res-chk" value="HDMI Cable"> HDMI Cable</label>
-                <label class="chk"><input type="checkbox" class="res-chk" value="Extension Box"> Extension Box</label>
-                <label class="chk"><input type="checkbox" class="res-chk" value="Podium"> Podium</label>
+        <div class="modal-footer">
+            <button class="btn-dark" onclick="loginAdmin()">Unlock Admin Mode</button>
+            <button class="btn-sm btn-outline" onclick="closeModal('loginModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: BOOK ROOM -->
+<div class="modal-bg" id="bookModal">
+    <div class="modal-card">
+        <div class="modal-title" id="bookModalTitle">Request Room Allocation</div>
+        <input type="hidden" id="bookRoomId">
+        <div class="form-group">
+            <label>Event / Class Name</label>
+            <input type="text" id="bookEventName" class="form-control" placeholder="e.g., DBMS Review / Coding Workshop">
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Organizer / Faculty</label>
+                <input type="text" id="bookOrganizer" class="form-control" placeholder="Your Name">
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select id="bookDept" class="form-control"></select>
             </div>
         </div>
-        <div style="display:flex; gap:8px; margin-top:14px;">
-            <button class="btn-go" id="m-submit-btn" style="flex:1;padding:10px" onclick="submitModal()">Submit Request</button>
-            <button class="tab" onclick="closeModal()">Cancel</button>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="bookStartDate" class="form-control" onchange="syncEndDate()">
+            </div>
+            <div class="form-group">
+                <label>End Date (Same for 1 Day)</label>
+                <input type="date" id="bookEndDate" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Expected Attendees</label>
+            <input type="number" id="bookCrowd" class="form-control" value="40" min="1">
+        </div>
+        <div class="form-group">
+            <label>Equipment Add-ons</label>
+            <div class="chip-group" style="margin-top:6px;">
+                <label class="check-label"><input type="checkbox" class="addon-cb" value="Wireless Mic"> Wireless Mic</label>
+                <label class="check-label"><input type="checkbox" class="addon-cb" value="Podium"> Podium</label>
+                <label class="check-label"><input type="checkbox" class="addon-cb" value="HDMI Cable"> HDMI Cable</label>
+                <label class="check-label"><input type="checkbox" class="addon-cb" value="Extension Box"> Extension Box</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-sm btn-outline" onclick="closeModal('bookModal')">Cancel</button>
+            <button class="btn-dark" onclick="submitBooking()">Submit Booking</button>
         </div>
     </div>
 </div>
 
-<!-- Admin Login Modal -->
-<div class="backdrop" id="admin-modal">
-    <div class="modal" style="max-width:340px">
-        <h3>Faculty / Admin Login</h3>
-        <div class="field">
-            <label>Enter Admin PIN</label>
-            <input type="password" id="pin-input" placeholder="PIN (2026)" onkeydown="if(event.key==='Enter') confirmAdmin()">
+<!-- MODAL: JOIN WAITLIST -->
+<div class="modal-bg" id="waitlistModal">
+    <div class="modal-card">
+        <div class="modal-title" id="waitlistModalTitle">Join Hall Waitlist Queue</div>
+        <input type="hidden" id="waitRoomId">
+        <div class="form-group">
+            <label>Event / Class Name</label>
+            <input type="text" id="waitEventName" class="form-control" placeholder="e.g., Extra Lab Session">
         </div>
-        <div style="display:flex; gap:8px; margin-top:12px;">
-            <button class="role-btn" style="flex:1" onclick="confirmAdmin()">Unlock Admin Mode</button>
-            <button class="tab" onclick="closeAdminModal()">Cancel</button>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Organizer Name</label>
+                <input type="text" id="waitOrganizer" class="form-control" placeholder="Your Name">
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <input type="text" id="waitDept" class="form-control" value="CSE">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-sm btn-outline" onclick="closeModal('waitlistModal')">Cancel</button>
+            <button class="btn-dark" onclick="submitWaitlist()">Add to Waitlist</button>
         </div>
     </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="toast"></div>
 
 <script>
-    // Live Animated Background
-    (function liveCanvas() {
-        const c = document.getElementById('bg-canvas');
-        const ctx = c.getContext('2d');
-        let w, h, pts;
-        function init() {
-            w = c.width = innerWidth; h = c.height = innerHeight;
-            const n = Math.min(44, Math.floor((w * h) / 29000));
-            pts = Array.from({ length: n }, () => ({
-                x: Math.random() * w, y: Math.random() * h,
-                vx: (Math.random() - 0.5) * 0.55, vy: (Math.random() - 0.5) * 0.55,
-                r: 2 + Math.random() * 2.2
-            }));
-        }
-        function step() {
-            ctx.clearRect(0, 0, w, h);
-            const t = performance.now() * 0.0004;
-            const glows = [
-                { x: w * (0.22 + 0.08 * Math.cos(t)), y: h * (0.25 + 0.07 * Math.sin(t)), rad: Math.max(w, h) * 0.28, col: 'rgba(59,130,246,0.12)' },
-                { x: w * (0.78 + 0.08 * Math.sin(t * 0.9)), y: h * (0.35 + 0.07 * Math.cos(t * 0.8)), rad: Math.max(w, h) * 0.26, col: 'rgba(139,92,246,0.11)' },
-                { x: w * (0.52 + 0.07 * Math.cos(t * 1.1)), y: h * (0.8 + 0.06 * Math.sin(t)), rad: Math.max(w, h) * 0.28, col: 'rgba(16,185,129,0.11)' }
-            ];
-            for (const g of glows) {
-                const grad = ctx.createRadialGradient(g.x, g.y, 8, g.x, g.y, g.rad);
-                grad.addColorStop(0, g.col); grad.addColorStop(1, 'transparent');
-                ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(g.x, g.y, g.rad, 0, Math.PI * 2); ctx.fill();
-            }
-            for (let i = 0; i < pts.length; i++) {
-                const a = pts[i]; a.x += a.vx; a.y += a.vy;
-                if (a.x < 0 || a.x > w) a.vx *= -1;
-                if (a.y < 0 || a.y > h) a.vy *= -1;
-                for (let j = i + 1; j < pts.length; j++) {
-                    const b = pts[j]; const d = Math.hypot(a.x - b.x, a.y - b.y);
-                    if (d < 140) {
-                        ctx.strokeStyle = `rgba(79,70,229,${0.14 * (1 - d / 140)})`;
-                        ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-                    }
-                }
-                ctx.fillStyle = 'rgba(79,70,229,0.38)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2); ctx.fill();
-            }
-            requestAnimationFrame(step);
-        }
-        addEventListener('resize', init); init(); step();
-    })();
-
-    document.getElementById('f-date').valueAsDate = new Date();
-    let roomsData = [];
-    let activeType = 'ALL';
+    let allRooms = [];
+    let allBookings = [];
     let isAdmin = false;
-    let adminPin = '';
+    let activeType = 'ALL';
 
     const blockIcons = {
-        'Block A': { bg: '#dbeafe', fg: '#1d4ed8', svg: '<path d="M4 20V6l8-3 8 3v14"/><path d="M9 10h2"/><path d="M13 10h2"/>' },
-        'Block B': { bg: '#d1fae5', fg: '#047857', svg: '<path d="M9 3h6"/><path d="M10 3v6l-4 8a2 2 0 0 0 1.8 3h8.4a2 2 0 0 0 1.8-3l-4-8V3"/>' },
-        'Block C': { bg: '#ede9fe', fg: '#6d28d9', svg: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>' },
-        'Block D': { bg: '#fef3c7', fg: '#b45309', svg: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>' },
-        'Block E': { bg: '#ffe4e6', fg: '#be123c', svg: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/>' },
-        'Block F': { bg: '#fae8ff', fg: '#a21caf', svg: '<path d="M3 12c0-5 4-9 9-9s9 4 9 9"/><path d="M5 12v7h14v-7"/><path d="M10 19v-5h4v5"/>' }
+        'Block A': { icon: '🏛', bg: '#e0e7ff', color: '#4338ca' },
+        'Block B': { icon: '🧪', bg: '#ccfbf1', color: '#0f766e' },
+        'Block C': { icon: '💻', bg: '#ede9fe', color: '#6d28d9' },
+        'Block D': { icon: '⚡', bg: '#fef3c7', color: '#b45309' },
+        'Block E': { icon: '⚙', bg: '#ffe4e6', color: '#be123c' },
+        'Block F': { icon: '🎭', bg: '#fce7f3', color: '#be185d' }
     };
 
-    function toast(msg) {
+    document.getElementById('searchDate').value = new Date().toISOString().split('T')[0];
+
+    function showToast(msg, isErr = false) {
         const t = document.getElementById('toast');
-        t.textContent = msg; t.style.display = 'block';
-        clearTimeout(t._id); t._id = setTimeout(() => t.style.display = 'none', 3200);
+        t.textContent = msg;
+        t.style.background = isErr ? '#dc2626' : '#0f172a';
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3500);
     }
 
-    function toggleAdmin() {
-        if (isAdmin) {
-            isAdmin = false;
-            adminPin = '';
-            updateRoleUI();
-            toast('Switched back to Student View');
-        } else {
-            document.getElementById('pin-input').value = '';
-            document.getElementById('admin-modal').style.display = 'flex';
-            document.getElementById('pin-input').focus();
-        }
-    }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-    function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
+    function switchTab(tab) {
+        ['viewRooms', 'viewBookings', 'viewAnalytics'].forEach(v => document.getElementById(v).classList.add('hidden'));
+        ['tabRooms', 'tabBookings', 'tabAnalytics'].forEach(b => document.getElementById(b).classList.remove('active'));
 
-    function confirmAdmin() {
-        const pin = document.getElementById('pin-input').value.trim();
-        if (pin !== '2026') {
-            toast('Incorrect Admin PIN');
-            return;
-        }
-        isAdmin = true;
-        adminPin = pin;
-        closeAdminModal();
-        updateRoleUI();
-        toast('Admin Mode Unlocked');
-    }
-
-    function updateRoleUI() {
-        const badge = document.getElementById('role-badge');
-        const btn = document.getElementById('role-toggle');
-        const anaTab = document.getElementById('tab-analytics');
-        const heading = document.getElementById('bookings-heading');
-
-        badge.textContent = isAdmin ? 'Admin Mode' : 'Student View';
-        badge.classList.toggle('admin-tag', isAdmin);
-        btn.textContent = isAdmin ? 'Logout Admin' : 'Admin Login';
-        btn.classList.toggle('admin-on', isAdmin);
-        anaTab.classList.toggle('hide', !isAdmin);
-        heading.textContent = isAdmin ? 'Admin Approval Queue & Emergency Room Swap' : 'Live Booking Status';
-
-        if (!isAdmin && !document.getElementById('sec-analytics').classList.contains('hide')) {
-            switchTab('rooms', document.getElementById('tab-rooms'));
-        }
-        if (!document.getElementById('sec-bookings').classList.contains('hide')) {
+        if (tab === 'rooms') {
+            document.getElementById('viewRooms').classList.remove('hidden');
+            document.getElementById('tabRooms').classList.add('active');
+            loadRooms();
+        } else if (tab === 'bookings') {
+            document.getElementById('viewBookings').classList.remove('hidden');
+            document.getElementById('tabBookings').classList.add('active');
             loadBookings();
+        } else if (tab === 'analytics') {
+            document.getElementById('viewAnalytics').classList.remove('hidden');
+            document.getElementById('tabAnalytics').classList.add('active');
+            loadAnalytics();
         }
     }
 
-    function switchTab(name, btn) {
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    function setQuickSlot(btn, st, et) {
+        btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('sec-rooms').classList.toggle('hide', name !== 'rooms');
-        document.getElementById('sec-bookings').classList.toggle('hide', name !== 'bookings');
-        document.getElementById('sec-analytics').classList.toggle('hide', name !== 'analytics');
-        if (name === 'bookings') loadBookings();
-        if (name === 'analytics') { loadAnalytics(); loadWaitlist(); }
-    }
-
-    function pickSlot(btn) {
-        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('t-start').value = btn.dataset.s;
-        document.getElementById('t-end').value = btn.dataset.e;
-        loadRooms();
-    }
-    function clearSlot() { document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active')); }
-    function pickType(btn) {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeType = btn.dataset.t;
+        document.getElementById('startTime').value = st;
+        document.getElementById('endTime').value = et;
         loadRooms();
     }
 
-    async function loadDepts() {
-        const res = await fetch('/api/departments');
-        const list = await res.json();
-        document.getElementById('m-dept').innerHTML =
-            list.map(d => `<option value="${d.id}">${d.code} — ${d.name}</option>`).join('');
+    function setTypeFilter(btn, type) {
+        document.querySelectorAll('#typeChips .chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        activeType = type;
+        renderRooms();
     }
 
     async function loadRooms() {
-        const qs = new URLSearchParams({
-            date: document.getElementById('f-date').value,
-            start: document.getElementById('t-start').value + ':00',
-            end: document.getElementById('t-end').value + ':00',
-            capacity: document.getElementById('f-cap').value || 1,
-            type: activeType,
-            ac: document.getElementById('f-ac').checked,
-            projector: document.getElementById('f-proj').checked
-        });
-        const res = await fetch('/api/rooms/search?' + qs);
+        const date = document.getElementById('searchDate').value;
+        const start = document.getElementById('startTime').value;
+        const end = document.getElementById('endTime').value;
+        const res = await fetch(`/api/rooms?date=${date}&start=${start}&end=${end}`);
         const data = await res.json();
-        roomsData = Array.isArray(data) ? data : [];
-        renderBlocks();
+        allRooms = data.rooms || [];
+
+        const deptSel = document.getElementById('bookDept');
+        if (deptSel.options.length === 0 && data.departments) {
+            deptSel.innerHTML = data.departments.map(d => `<option value="${d.dept_id}">${d.dept_name}</option>`).join('');
+        }
+        renderRooms();
     }
 
-    function renderBlocks() {
-        const freeOnly = document.getElementById('only-free').checked;
-        const blocks = ['Block A', 'Block B', 'Block C', 'Block D', 'Block E', 'Block F'];
-        const freeAll = roomsData.filter(r => r.status === 'AVAILABLE');
+    function renderRooms() {
+        const minSeats = parseInt(document.getElementById('minSeats').value) || 1;
+        const needAc = document.getElementById('filterAc').checked;
+        const needProj = document.getElementById('filterProj').checked;
+        const freeOnly = document.getElementById('filterFree').checked;
 
-        document.getElementById('spot-text').innerHTML =
-            `<strong>${freeAll.length}</strong> of <strong>${roomsData.length}</strong> spaces FREE (${document.getElementById('t-start').value}–${document.getElementById('t-end').value})`;
-        const freeBlks = blocks.filter(b => roomsData.some(r => r.block === b && r.status === 'AVAILABLE'));
-        document.getElementById('spot-blocks').textContent = freeBlks.length ? `Free in: ${freeBlks.join(', ')}` : 'All blocks busy';
+        const filtered = allRooms.filter(r => {
+            if (activeType !== 'ALL' && r.room_type !== activeType) return false;
+            if (r.capacity < minSeats) return false;
+            if (needAc && !r.has_ac) return false;
+            if (needProj && !r.has_projector) return false;
+            if (freeOnly && r.status !== 'FREE') return false;
+            return true;
+        });
 
-        document.getElementById('blocks-grid').innerHTML = blocks.map(blk => {
-            const inBlk = roomsData.filter(r => r.block === blk);
-            const freeInBlk = inBlk.filter(r => r.status === 'AVAILABLE');
-            const shown = freeOnly ? freeInBlk : inBlk;
-            const pct = inBlk.length ? Math.round((freeInBlk.length / inBlk.length) * 100) : 0;
-            const art = blockIcons[blk];
+        const freeTotal = filtered.filter(r => r.status === 'FREE').length;
+        const st = document.getElementById('startTime').value;
+        const et = document.getElementById('endTime').value;
+        document.getElementById('summaryLeft').innerHTML =
+            `<span class="dot-green"></span><strong>${freeTotal}</strong> of <strong>${filtered.length}</strong> spaces FREE (${st}–${et})`;
 
-            const items = shown.length ? shown.map(r => {
-                const isFree = r.status === 'AVAILABLE';
-                return `
-          <div class="r-item ${isFree ? 'free' : ''}">
-            <div>
-              <div class="r-main">${r.room_number} <span style="font-weight:600;color:var(--muted);font-size:0.76rem">· ${r.type.replace('_',' ')}</span></div>
-              <div class="r-info">${r.capacity} seats · ${r.ac ? 'AC' : 'Non-AC'} · ${r.projector ? 'Proj.' : 'No Proj.'} · ${r.reason}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="badge s-${r.status}">${isFree ? 'FREE' : r.status.replace('_',' ')}</span>
-              ${isFree
-                    ? `<button class="btn-go" onclick="openModal(${r.room_id}, '${r.room_number}', ${r.capacity}, 'book')">Book</button>`
-                    : `<button class="btn-wait" onclick="openModal(${r.room_id}, '${r.room_number}', ${r.capacity}, 'waitlist')">Waitlist</button>`}
-            </div>
-          </div>`;
-            }).join('') : `<div class="r-info" style="padding:6px">No rooms match in ${blk}.</div>`;
+        const blocks = {};
+        filtered.forEach(r => {
+            if (!blocks[r.block_name]) blocks[r.block_name] = [];
+            blocks[r.block_name].push(r);
+        });
 
+        const freeBlocks = Object.keys(blocks).filter(b => blocks[b].some(r => r.status === 'FREE'));
+        document.getElementById('summaryRight').textContent = freeBlocks.length ? 'Free in: ' + freeBlocks.join(', ') : 'No free blocks for this filter';
+
+        const grid = document.getElementById('blocksGrid');
+        grid.innerHTML = Object.keys(blocks).map(bName => {
+            const list = blocks[bName];
+            const freeList = list.filter(r => r.status === 'FREE');
+            const pct = Math.round((freeList.length / list.length) * 100);
+            const meta = blockIcons[bName] || { icon: '🏫', bg: '#e2e8f0', color: '#334155' };
             return `
-        <article class="block-card">
-          <div>
-            <div class="block-head">
-              <div class="block-title-wrap">
-                <div class="art-badge" style="background:${art.bg};color:${art.fg}">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${art.svg}</svg>
+                <div class="block-card">
+                    <div class="block-header">
+                        <div class="block-title-wrap">
+                            <div class="block-icon" style="background:${meta.bg};color:${meta.color};">${meta.icon}</div>
+                            <div>
+                                <div class="block-title">${bName}</div>
+                                <div class="block-sub">Free: ${freeList.length ? freeList.map(x => x.room_no).join(', ') : 'None'}</div>
+                            </div>
+                        </div>
+                        <div class="free-count">${freeList.length}/${list.length} Free</div>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+                    ${list.map(r => {
+                const badgeClass = r.status === 'FREE' ? 'badge-free' : (r.status === 'BOOKED' ? 'badge-booked' : 'badge-occupied');
+                const actionBtn = r.status === 'FREE'
+                    ? `<button class="btn-sm btn-book" onclick="openBookModal(${r.room_id}, '${r.room_no}', '${r.block_name}', ${r.capacity})">Book</button>`
+                    : `<button class="btn-sm btn-waitlist" onclick="openWaitlistModal(${r.room_id}, '${r.room_no}', '${r.block_name}')">Waitlist</button>`;
+                return `
+                            <div class="room-item">
+                                <div>
+                                    <div><span class="room-name">${r.room_no}</span><span class="room-type">${r.room_type}</span></div>
+                                    <div class="room-meta">${r.capacity} seats · ${r.has_ac ? 'AC' : 'Non-AC'} · ${r.has_projector ? 'Proj' : 'No Proj'} · ${r.detail}</div>
+                                </div>
+                                <div class="room-right">
+                                    <span class="badge ${badgeClass}">${r.status}</span>
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        `;
+            }).join('')}
                 </div>
-                <div>
-                  <div class="b-name">${blk}</div>
-                  <div class="b-free-list">${freeInBlk.length ? `Free: ${freeInBlk.map(r => r.room_number).join(', ')}` : 'All busy'}</div>
-                </div>
-              </div>
-              <span style="font-size:0.78rem;font-weight:700;color:var(--emerald)">${freeInBlk.length}/${inBlk.length} Free</span>
-            </div>
-            <div class="meter-wrap" style="margin-top:8px"><div class="meter-fill" style="width:${pct}%"></div></div>
-          </div>
-          <div class="room-stack">${items}</div>
-        </article>`;
+            `;
         }).join('');
     }
 
-    function openModal(id, code, cap, mode) {
-        document.getElementById('m-rid').value = id;
-        document.getElementById('m-mode').value = mode;
-        document.getElementById('m-title').textContent = mode === 'waitlist' ? `Join Waitlist: ${code}` : `Request ${code} (Max ${cap})`;
-        document.getElementById('m-submit-btn').textContent = mode === 'waitlist' ? 'Join Waitlist' : 'Submit Request';
-        document.getElementById('end-date-wrap').style.display = mode === 'waitlist' ? 'none' : 'block';
-        document.getElementById('addons-wrap').style.display = mode === 'waitlist' ? 'none' : 'block';
-        document.getElementById('m-end-date').value = document.getElementById('f-date').value;
-        document.getElementById('m-att').value = Math.min(cap, 40);
-        document.querySelectorAll('.res-chk').forEach(c => c.checked = false);
-        document.getElementById('modal').style.display = 'flex';
+    function openBookModal(roomId, roomNo, blockName, cap) {
+        document.getElementById('bookRoomId').value = roomId;
+        document.getElementById('bookModalTitle').textContent = `Book ${roomNo} (${blockName}) · Max ${cap} seats`;
+        const selectedDate = document.getElementById('searchDate').value;
+        document.getElementById('bookStartDate').value = selectedDate;
+        document.getElementById('bookEndDate').value = selectedDate;
+        document.getElementById('bookEventName').value = '';
+        document.getElementById('bookOrganizer').value = '';
+        document.getElementById('bookCrowd').value = Math.min(40, cap);
+        document.querySelectorAll('.addon-cb').forEach(cb => cb.checked = false);
+        openModal('bookModal');
     }
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-    async function submitModal() {
-        const mode = document.getElementById('m-mode').value;
-        const resources = Array.from(document.querySelectorAll('.res-chk:checked')).map(c => c.value).join(',');
-        const body = new URLSearchParams({
-            room_id: document.getElementById('m-rid').value,
-            event_name: document.getElementById('m-ev').value,
-            organizer_name: document.getElementById('m-org').value,
-            dept_id: document.getElementById('m-dept').value,
-            booking_date: document.getElementById('f-date').value,
-            end_date: document.getElementById('m-end-date').value,
-            start_time: document.getElementById('t-start').value + ':00',
-            end_time: document.getElementById('t-end').value + ':00',
-            attendees: document.getElementById('m-att').value,
-            resources
+    function syncEndDate() {
+        document.getElementById('bookEndDate').value = document.getElementById('bookStartDate').value;
+    }
+
+    async function submitBooking() {
+        const addons = Array.from(document.querySelectorAll('.addon-cb:checked')).map(cb => cb.value).join(', ');
+        const params = new URLSearchParams({
+            room_id: document.getElementById('bookRoomId').value,
+            dept_id: document.getElementById('bookDept').value,
+            event_name: document.getElementById('bookEventName').value,
+            organizer_name: document.getElementById('bookOrganizer').value,
+            expected_crowd: document.getElementById('bookCrowd').value,
+            start_date: document.getElementById('bookStartDate').value,
+            end_date: document.getElementById('bookEndDate').value,
+            start_time: document.getElementById('startTime').value,
+            end_time: document.getElementById('endTime').value,
+            addons: addons
         });
-        const url = mode === 'waitlist' ? '/api/waitlist/join' : '/api/bookings/create';
-        const res = await fetch(url, { method: 'POST', body });
+        if (!params.get('event_name').trim() || !params.get('organizer_name').trim()) {
+            showToast('Please enter Event Name and Organizer Name.', true);
+            return;
+        }
+        const res = await fetch('/api/book', { method: 'POST', body: params });
         const data = await res.json();
-        toast(data.message || data.error);
-        if (res.ok) { closeModal(); loadRooms(); }
+        if (res.ok) {
+            closeModal('bookModal');
+            showToast(data.message);
+            loadRooms();
+        } else {
+            showToast(data.error || 'Booking failed', true);
+        }
+    }
+
+    function openWaitlistModal(roomId, roomNo, blockName) {
+        document.getElementById('waitRoomId').value = roomId;
+        document.getElementById('waitlistModalTitle').textContent = `Join Waitlist for ${roomNo} (${blockName})`;
+        document.getElementById('waitEventName').value = '';
+        document.getElementById('waitOrganizer').value = '';
+        openModal('waitlistModal');
+    }
+
+    async function submitWaitlist() {
+        const params = new URLSearchParams({
+            room_id: document.getElementById('waitRoomId').value,
+            event_name: document.getElementById('waitEventName').value,
+            organizer_name: document.getElementById('waitOrganizer').value,
+            dept_name: document.getElementById('waitDept').value,
+            event_date: document.getElementById('searchDate').value,
+            start_time: document.getElementById('startTime').value,
+            end_time: document.getElementById('endTime').value
+        });
+        const res = await fetch('/api/waitlist', { method: 'POST', body: params });
+        const data = await res.json();
+        if (res.ok) {
+            closeModal('waitlistModal');
+            showToast(data.message);
+        } else {
+            showToast(data.error || 'Failed to add to waitlist', true);
+        }
     }
 
     async function loadBookings() {
-        const res = await fetch('/api/bookings/list');
-        const rows = await res.json();
-        document.getElementById('bookings-rows').innerHTML = rows.length ? rows.map(b => {
+        const res = await fetch('/api/bookings');
+        allBookings = await res.json();
+        document.getElementById('bookingsHeading').textContent =
+            isAdmin ? 'Admin Approval Queue, Emergency Swap & Delete' : 'Live Booking Status';
+
+        const tbody = document.getElementById('bookingsBody');
+        if (!allBookings.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">No bookings yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = allBookings.map(b => {
+            const stClass = b.status === 'APPROVED' ? 'badge-approved' : (b.status === 'REJECTED' ? 'badge-rejected' : 'badge-pending');
             let actions = '';
             if (isAdmin) {
                 if (b.status === 'PENDING') {
-                    actions += `<button class="act" onclick="decide(${b.booking_id}, 'APPROVED')">Approve</button>`;
-                    actions += `<button class="act" onclick="decide(${b.booking_id}, 'REJECTED')">Reject</button>`;
+                    actions += `<button class="btn-sm btn-approve" onclick="updateStatus(${b.booking_id},'APPROVED')">Approve</button> `;
+                    actions += `<button class="btn-sm btn-reject" onclick="updateStatus(${b.booking_id},'REJECTED')">Reject</button> `;
+                } else if (b.status === 'APPROVED') {
+                    actions += `<button class="btn-sm btn-outline" onclick="emergencySwap(${b.booking_id})">Swap</button> `;
+                    actions += `<button class="btn-sm btn-outline" onclick="openQrPass(${b.booking_id})">QR Pass</button> `;
                 }
-                if (b.status !== 'REJECTED') {
-                    actions += `<button class="act" onclick="swapRoom(${b.booking_id})">Swap</button>`;
-                }
-            }
-            if (b.status === 'APPROVED') {
-                actions += `<button class="act" onclick='printPass(${JSON.stringify(b)})'>QR Pass</button>`;
-            }
-            if (!actions) {
-                actions = `<span style="color:var(--muted);font-size:0.78rem">${b.status === 'PENDING' ? 'Awaiting Faculty' : '—'}</span>`;
+                actions += `<button class="btn-sm btn-delete" onclick="deleteBooking(${b.booking_id})">Delete</button>`;
+            } else {
+                actions = b.status === 'APPROVED'
+                    ? `<button class="btn-sm btn-outline" onclick="openQrPass(${b.booking_id})">QR Pass</button>`
+                    : '—';
             }
 
             return `
-        <tr>
-          <td>#${b.booking_id}</td>
-          <td><strong>${b.room_number}</strong> <span style="color:var(--muted)">(${b.block})</span></td>
-          <td>
-            <strong>${b.event_name}</strong><br>
-            <span style="color:var(--muted);font-size:0.78rem">${b.organizer} · ${b.attendees} pax</span>
-            ${b.resources ? `<br><span style="color:var(--blue);font-size:0.75rem">Add-ons: ${b.resources}</span>` : ''}
-          </td>
-          <td>${b.dept}</td>
-          <td>${b.date}<br><span style="color:var(--muted);font-size:0.78rem">${b.start.slice(0,5)}–${b.end.slice(0,5)}</span></td>
-          <td><span class="badge s-${b.status}">${b.status}</span></td>
-          <td>${actions}</td>
-        </tr>`;
-        }).join('') : `<tr><td colspan="7" style="color:var(--muted)">No booking requests yet.</td></tr>`;
+                <tr>
+                    <td><strong>#${b.booking_id}</strong></td>
+                    <td><strong>${b.room_no}</strong> <span class="sub-text">(${b.block_name})</span></td>
+                    <td>
+                        <strong>${b.event_name}</strong>
+                        <div class="sub-text">${b.organizer_name} · ${b.expected_crowd} pax</div>
+                        <div class="addon-text">Add-ons: ${b.addons}</div>
+                    </td>
+                    <td>${b.dept_name}</td>
+                    <td>
+                        <div>${b.event_date}</div>
+                        <div class="sub-text">${b.start_time}–${b.end_time}</div>
+                    </td>
+                    <td><span class="badge ${stClass}">${b.status}</span></td>
+                    <td style="white-space:nowrap;">${actions}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
-    async function decide(id, status) {
-        const remarks = status === 'REJECTED' ? (prompt('Rejection reason:') || 'Rejected') : 'Approved';
-        const body = new URLSearchParams({ booking_id: id, status, pin: adminPin, remarks });
-        const res = await fetch('/api/bookings/approve', { method: 'POST', body });
+    async function updateStatus(id, status) {
+        const res = await fetch('/api/admin/status', {
+            method: 'POST',
+            body: new URLSearchParams({ booking_id: id, status })
+        });
         const data = await res.json();
-        toast(data.message || data.error);
+        showToast(data.message || data.error, !res.ok);
         loadBookings();
     }
 
-    async function swapRoom(id) {
-        const body = new URLSearchParams({ booking_id: id, pin: adminPin });
-        const res = await fetch('/api/bookings/swap', { method: 'POST', body });
+    async function emergencySwap(id) {
+        const res = await fetch('/api/admin/swap', {
+            method: 'POST',
+            body: new URLSearchParams({ booking_id: id })
+        });
         const data = await res.json();
-        toast(data.message || data.error);
+        showToast(data.message || data.error, !res.ok);
+        loadBookings();
+    }
+
+    async function deleteBooking(id) {
+        if (!confirm(`Permanently delete Booking #${id}?`)) return;
+        const res = await fetch(`/api/delete-booking?id=${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        showToast(data.message || data.error, !res.ok);
         loadBookings();
     }
 
     async function loadAnalytics() {
         const res = await fetch('/api/analytics');
         const data = await res.json();
-        const maxB = Math.max(1, ...data.map(d => d.bookings));
-        document.getElementById('analytics-bars').innerHTML = data.map(d => `
-      <div class="bar-row">
-        <strong>${d.block}</strong>
-        <div class="bar-track"><div class="bar-val" style="width:${Math.round((d.bookings / maxB) * 100)}%"></div></div>
-        <span style="color:var(--muted)">${d.bookings} active / ${d.rooms} rooms</span>
-      </div>
-    `).join('');
+
+        document.getElementById('utilizationBars').innerHTML = (data.blocks || []).map(b => {
+            const pct = Math.min(100, Math.round((b.active_bookings / Math.max(1, b.total_rooms)) * 100));
+            return `
+                <div class="util-row">
+                    <span>${b.block_name}</span>
+                    <div class="util-track"><div class="util-fill" style="width:${pct}%"></div></div>
+                    <span style="text-align:right;color:#475569;font-weight:600;">${b.active_bookings} active / ${b.total_rooms} rooms</span>
+                </div>
+            `;
+        }).join('');
+
+        const wb = document.getElementById('waitlistBody');
+        if (!data.waitlist || !data.waitlist.length) {
+            wb.innerHTML = '<tr><td colspan="5" style="color:#64748b;">No waitlisted requests yet.</td></tr>';
+            return;
+        }
+        wb.innerHTML = data.waitlist.map(w => `
+            <tr>
+                <td><strong>#${w.waitlist_id}</strong></td>
+                <td><strong>${w.room_no}</strong> <span class="sub-text">(${w.block_name})</span></td>
+                <td>
+                    <strong>${w.event_name}</strong>
+                    <div class="sub-text">${w.organizer_name} (${w.dept_name})</div>
+                </td>
+                <td>
+                    <div>${w.event_date}</div>
+                    <div class="sub-text">${w.start_time}–${w.end_time}</div>
+                </td>
+                <td style="white-space:nowrap;">
+                    <button class="btn-sm btn-promote" onclick="promoteWaitlist(${w.waitlist_id})">Promote</button>
+                    <button class="btn-sm btn-delete" onclick="deleteWaitlist(${w.waitlist_id})">Remove</button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    async function loadWaitlist() {
-        const res = await fetch('/api/waitlist/list');
-        const rows = await res.json();
-        document.getElementById('waitlist-rows').innerHTML = rows.length ? rows.map(w => `
-      <tr>
-        <td>#${w.id}</td>
-        <td><strong>${w.room_number}</strong> (${w.block})</td>
-        <td><strong>${w.event}</strong><br><span style="color:var(--muted);font-size:0.78rem">${w.organizer} (${w.dept}) · ${w.attendees} pax</span></td>
-        <td>${w.date} · ${w.start.slice(0,5)}–${w.end.slice(0,5)}</td>
-        <td><button class="act" onclick="promoteWait(${w.id})">Promote to Approved</button></td>
-      </tr>
-    `).join('') : `<tr><td colspan="5" style="color:var(--muted)">No waitlisted requests yet.</td></tr>`;
-    }
-
-    async function promoteWait(id) {
-        const body = new URLSearchParams({ waitlist_id: id, pin: adminPin });
-        const res = await fetch('/api/waitlist/promote', { method: 'POST', body });
+    async function promoteWaitlist(id) {
+        const res = await fetch('/api/waitlist/promote', {
+            method: 'POST',
+            body: new URLSearchParams({ waitlist_id: id })
+        });
         const data = await res.json();
-        toast(data.message || data.error);
-        loadWaitlist();
+        showToast(data.message || data.error, !res.ok);
         loadAnalytics();
     }
 
-    function printPass(b) {
-        const qrText = encodeURIComponent(`PASS #${b.booking_id} | ${b.room_number} (${b.block}) | ${b.event_name} | ${b.date} ${b.start.slice(0,5)}-${b.end.slice(0,5)} | STATUS: ${b.status}`);
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${qrText}`;
-        const w = window.open('', '_blank', 'width=620,height=480');
+    async function deleteWaitlist(id) {
+        if (!confirm('Remove this entry from Waitlist Queue?')) return;
+        const res = await fetch(`/api/waitlist/delete?id=${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        showToast(data.message || data.error, !res.ok);
+        loadAnalytics();
+    }
+
+    async function loginAdmin() {
+        const pin = document.getElementById('adminPinInput').value;
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            body: new URLSearchParams({ pin })
+        });
+        if (res.ok) {
+            isAdmin = true;
+            closeModal('loginModal');
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('rolePill').textContent = 'Admin Mode';
+            document.getElementById('rolePill').className = 'role-pill role-admin';
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('tabAnalytics').classList.remove('hidden');
+            showToast('Admin Mode Unlocked');
+            loadBookings();
+        } else {
+            showToast('Invalid Admin PIN (use 2026)', true);
+        }
+    }
+
+    function logoutAdmin() {
+        isAdmin = false;
+        document.getElementById('rolePill').textContent = 'Student View';
+        document.getElementById('rolePill').className = 'role-pill role-student';
+        document.getElementById('loginBtn').classList.remove('hidden');
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('tabAnalytics').classList.add('hidden');
+        switchTab('rooms');
+        showToast('Logged out of Admin Mode');
+    }
+
+    function openQrPass(bookingId) {
+        const b = allBookings.find(x => x.booking_id === bookingId);
+        if (!b) return;
+        const qrText = `REC Smart Campus Pass | ID:#${b.booking_id} | Room:${b.room_no}(${b.block_name}) | Event:${b.event_name} | Date:${b.event_date} ${b.start_time}-${b.end_time} | Status:APPROVED`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrText)}`;
+        const w = window.open('', '_blank', 'width=560,height=440');
         w.document.write(`
-      <html><body style="font-family:sans-serif;padding:28px;border:2px solid #0f172a;margin:18px;border-radius:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <h2 style="margin:0;">Smart Campus Allocation Pass</h2>
-            <p style="margin:4px 0;color:#475569;">Allotment ID: #${b.booking_id}</p>
-          </div>
-          <img src="${qrUrl}" alt="Verification QR" width="110" height="110" style="border:1px solid #cbd5e1;padding:4px;border-radius:8px;">
-        </div>
-        <hr style="margin:14px 0;">
-        <p><b>Venue:</b> ${b.room_number} (${b.block})</p>
-        <p><b>Event:</b> ${b.event_name}</p>
-        <p><b>Coordinator:</b> ${b.organizer} (${b.dept})</p>
-        <p><b>Schedule:</b> ${b.date} | ${b.start.slice(0,5)} – ${b.end.slice(0,5)}</p>
-        <p><b>Attendees:</b> ${b.attendees}</p>
-        ${b.resources ? `<p><b>Equipment Add-ons:</b> ${b.resources}</p>` : ''}
-        <p style="margin-top:18px;color:#059669;font-weight:bold;">VERIFIED STATUS: ${b.status}</p>
-        <script>window.onload = () => window.print();<\/script>
-      </body></html>
-    `);
+            <html><head><title>Allocation Pass #${b.booking_id}</title>
+            <style>body{font-family:Segoe UI,sans-serif;padding:24px;color:#0f172a;}
+            .card{border:2px solid #0f172a;border-radius:14px;padding:22px;}
+            .top{display:flex;justify-content:space-between;align-items:flex-start;}
+            p{margin:8px 0;font-size:14px;} .ok{color:#15803d;font-weight:800;margin-top:14px;}</style></head>
+            <body><div class="card">
+                <div class="top">
+                    <div><h2 style="margin:0;">Smart Campus Allocation Pass</h2><div style="color:#64748b;margin-top:4px;">Allotment ID: #${b.booking_id}</div></div>
+                    <img src="${qrUrl}" width="130" height="130" alt="QR Pass">
+                </div>
+                <p><strong>Venue:</strong> ${b.room_no} (${b.block_name})</p>
+                <p><strong>Event:</strong> ${b.event_name}</p>
+                <p><strong>Coordinator:</strong> ${b.organizer_name} (${b.dept_name})</p>
+                <p><strong>Schedule:</strong> ${b.event_date} | ${b.start_time} – ${b.end_time}</p>
+                <p><strong>Attendees:</strong> ${b.expected_crowd}</p>
+                <p><strong>Equipment Add-ons:</strong> ${b.addons}</p>
+                <div class="ok">VERIFIED STATUS: APPROVED</div>
+            </div></body></html>
+        `);
         w.document.close();
     }
 
-    loadDepts();
     loadRooms();
 </script>
 </body>
